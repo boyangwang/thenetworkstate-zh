@@ -1,0 +1,724 @@
+
+<!-- saved from url=(0058)https://thenetworkstate.com/the-network-state-in-one-essay -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>(function(){function hookGeo() {
+  //<![CDATA[
+  const WAIT_TIME = 100;
+  const hookedObj = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),
+    watchPosition: navigator.geolocation.watchPosition.bind(navigator.geolocation),
+    fakeGeo: true,
+    genLat: 38.883333,
+    genLon: -77.000
+  };
+
+  function waitGetCurrentPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        hookedObj.tmp_successCallback({
+          coords: {
+            latitude: hookedObj.genLat,
+            longitude: hookedObj.genLon,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        hookedObj.getCurrentPosition(hookedObj.tmp_successCallback, hookedObj.tmp_errorCallback, hookedObj.tmp_options);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        navigator.getCurrentPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        hookedObj.watchPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  Object.getPrototypeOf(navigator.geolocation).getCurrentPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp_successCallback = successCallback;
+    hookedObj.tmp_errorCallback = errorCallback;
+    hookedObj.tmp_options = options;
+    waitGetCurrentPosition();
+  };
+  Object.getPrototypeOf(navigator.geolocation).watchPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp2_successCallback = successCallback;
+    hookedObj.tmp2_errorCallback = errorCallback;
+    hookedObj.tmp2_options = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${hookGeo}
+          )();<\/script>`;
+    
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+    
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window) {
+      return;
+    }
+    const message = event.data;
+    switch (message.method) {
+      case 'updateLocation':
+        if ((typeof message.info === 'object') && (typeof message.info.coords === 'object')) {
+          hookedObj.genLat = message.info.coords.lat;
+          hookedObj.genLon = message.info.coords.lon;
+          hookedObj.fakeGeo = message.info.fakeIt;
+        }
+        break;
+      default:
+        break;
+    }
+  }, false);
+  //]]>
+}hookGeo();})()</script>
+    <!--<base href="https://book.thenetworkstate.com">--><base href=".">
+    
+    <meta name="description" content="A peaceful, reproducible process for turning an online community premised on a proposition into a physical state: a network state.">
+
+    <link rel="canonical" href="https://thenetworkstate.com/the-network-state-in-one-essay">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta property="og:site_name" content="thenetworkstate.com">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Network State in One Essay | The Network State">
+    <meta property="og:description" content="A peaceful, reproducible process for turning an online community premised on a proposition into a physical state: a network state.">
+    <meta property="og:image" content="https://book.thenetworkstate.com/assets/the-network-state-in-one-essay-opengraph.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Network State in One Essay | The Network State">
+    <meta property="twitter:description" content="A peaceful, reproducible process for turning an online community premised on a proposition into a physical state: a network state.">
+    <meta name="twitter:image" content="https://book.thenetworkstate.com/assets/the-network-state-in-one-essay-opengraph.png">
+    <meta name="twitter:site" content="@thenetworkstate">
+    <meta name="twitter:widgets:csp" content="on">
+    <meta name="twitter:dnt" content="on">
+    <meta name="book:title" content="The Network State">
+    <meta name="book:description" content="Technology has enabled us to start new companies, new communities, and new currencies. But can we use it to start new cities, or even new countries? This book explains how to build the successor to the nation state, a concept we call the network state.">
+    <meta name="book:identifier" content="B09VPKZR3G">
+    <meta name="book:author" content="Balaji Srinivasan">
+    <meta name="book:cover_image_url" content="/assets/cover-tns-small.png">
+    <meta name="ga_measurement_id" content="G-LS6LDVQH4M">
+    <meta name="hotjar_measurement_id" content="3054693">
+    <meta name="ga_measurement_id" content="G-LS6LDVQH4M">
+    <meta name="appendix_post_slugs" content="">
+    <meta name="appendix_post_titles" content="">
+    <meta name="toc" content="&lt;Quickstart&gt;|preamble|Preamble|0.002404902300844028|the-network-state-in-one-sentence|The Network State in One Sentence|0.0017458665741704243|the-network-state-in-one-image|The Network State in One Image|0.0016996184530003468|the-network-state-in-one-thousand-words|The Network State in One Thousand Words|0.0029483177245924383|the-network-state-in-one-essay|The Network State in One Essay|0.031541218637992835|&lt;History as Trajectory&gt;|prologue|Prologue|0.02974910394265233|microhistory-and-macrohistory|Microhistory and Macrohistory|0.035530119088912016|political-power-and-technological-truth|Political Power and Technological Truth|0.03461093768065673|god-state-network|God, State, Network|0.0488958261070644|people-of-god-people-of-the-state-people-of-the-network|People of God, People of the State, People of the Network|0.0583882529772228|if-the-news-is-fake-imagine-history|If the News is Fake, Imagine History|0.04023586541796739|fragmentation-frontier-fourth-turning-future-is-our-past|Fragmentation, Frontier, Fourth Turning, Future Is Our Past|0.027465602959879754|left-is-the-new-right-is-the-new-left|Left is the New Right is the New Left|0.11484564689559487|the-one-commandment|The One Commandment|0.04572204879176783|&lt;The Tripolar Moment&gt;|nyt-ccp-btc|NYT, CCP, BTC|0.002167880679847381|the-dated-and-the-timeless|The Dated and the Timeless|0.0018152387559255405|a-bipolar-america-and-a-tripolar-triangle|A Bipolar America and a Tripolar Triangle|0.0010694878020580413|moral-power-martial-power-money-power|Moral Power, Martial Power, Money Power|0.024245577523413112|submission-sympathy-sovereignty|Submission, Sympathy, Sovereignty|0.00747485258411377|conflicts-and-alliances|Conflicts and Alliances|0.01186264308012487|&lt;Decentralization, Recentralization&gt;|the-possible-futures|The Possible Futures|0.016857440166493237|sociopolitical-axes|Sociopolitical Axes|0.0145970632443057|technoeconomic-axes|Technoeconomic Axes|0.03975604116082784|foreseeable-futures|Foreseeable Futures|0.00711064862989941|american-anarchy-chinese-control-international-intermediate|American Anarchy, Chinese Control, International Intermediate|0.06466065441091455|victory-conditions-and-surprise-endings|Victory Conditions and Surprise Endings|0.020378078390565383|towards-a-recentralized-center|Towards a Recentralized Center|0.005439935252630362|&lt;From Nation States to Network States&gt;|why-now|Why Now?|0.0012544802867383513|on-nation-states|On Nation States|0.08863452422245346|on-network-states|On Network States|0.15953867499132848|&lt;Appendix&gt;|acknowledgments|Acknowledgments|0.001150422014105677|about-1729|About 1729|6.821597872586426e-4|footnotes|Footnotes|0.055520869464678">
+    <title>The Network State in One Essay | The Network State</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="icon" href="https://book.thenetworkstate.com/images/icons/favicon.png" type="image/png">
+    <link rel="manifest" href="https://book.thenetworkstate.com/manifest.webmanifest">
+    <link href="./The Network State in One Essay _ The Network State_files/css" rel="stylesheet">
+    <script src="./The Network State in One Essay _ The Network State_files/init.js" async=""></script>
+    <script src="./The Network State in One Essay _ The Network State_files/index.js" async=""></script>
+    <link rel="stylesheet" href="./The Network State in One Essay _ The Network State_files/fonts.css">
+    <link rel="stylesheet" href="./The Network State in One Essay _ The Network State_files/style.css">
+    <script async="" src="./The Network State in One Essay _ The Network State_files/js"></script>
+  <script async="" src="./The Network State in One Essay _ The Network State_files/hotjar-3054693.js"></script>
+  <style data-styled="active" data-styled-version="5.3.5">
+  .header-menu-button img {
+    display: none;
+  }
+  .hYNUlc{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;margin-top:8px;width:100%;height:52px;}@media (max-width:640px){.hYNUlc{margin-top:8px;}}.bRCNAF{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;font-family:Inter,Arial,sans-serif;font-weight:600;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;border-radius:0 100px 100px 0;padding:14px 14px;font-size:16px;border:1px solid black;color:white;background-color:black;height:100%;box-sizing:border-box;width:115px;}.bRCNAF:hover{background-color:#222;}.ODxyB{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;min-width:0px;width:100%;font-family:Inter,Arial,sans-serif;padding:0 8px 0 18px;cursor:auto;font-size:16px;}.ODxyB::-webkit-input-placeholder{font-size:16px;}.ODxyB::-moz-placeholder{font-size:16px;}.ODxyB:-ms-input-placeholder{font-size:16px;}.ODxyB::placeholder{font-size:16px;}.jiAFJv{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;-webkit-flex:1;-ms-flex:1;flex:1;min-width:0px;height:100%;border-radius:100px 0 0 100px;box-sizing:border-box;border:1px solid black;}.jiAFJv.sent:hover{border:1px solid #cbcbcb;background-color:transparent;}.gKUdVL{pointer-events:auto;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;position:absolute;width:100%;top:71px;bottom:0px;z-index:50;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;background-color:white;overflow-y:auto;}@media (max-width:640px){.gKUdVL{-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;}}.XgJTT{height:100%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;margin:24px;margin-top:128px;}.fqXGQj{font-family:'Suisse Works';font-style:normal;font-weight:700;line-height:100%;font-size:38px;text-align:center;margin-bottom:14px;}@media (max-width:640px){.fqXGQj{font-size:32px;}}.cGGRcu{font-family:Inter,Arial,sans-serif;font-style:normal;font-weight:500;font-size:18px;margin-bottom:48px;text-align:center;line-height:1.45;color:#545454;}@media (max-width:640px){.cGGRcu{font-size:14px;margin-bottom:24px;}}.bgyqUi{margin-bottom:12px;}.gYCFYZ{width:100%;max-width:calc(min(100vw,682px));display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:space-around;-webkit-justify-content:space-around;-ms-flex-pack:space-around;justify-content:space-around;box-sizing:border-box;margin-top:8px;}@media (max-width:640px){.gYCFYZ{margin:auto;}}.fafcIY{background-color:#e2e2e2;border-radius:24px;height:4px;margin:0 4px;position:relative;}@media (max-width:640px){.fafcIY{margin:0 2px;}}.fafcIY .progress{border-radius:24px;}.fafcIY:first-child{margin-left:0;border-radius:0 24px 24px 0;}.fafcIY:first-child .progress{border-radius:0 24px 24px 0;}.fafcIY:last-child{margin-right:0;border-radius:24px 0 0 24px;}.fafcIY:last-child .progress{border-radius:24px 0 0 24px;}.jYJsaL{position:absolute;top:0;left:0;background-color:black;height:4px;}.dIdqUp{pointer-events:none;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;height:100%;-webkit-flex:10;-ms-flex:10;flex:10;}@media (max-width:640px){.dIdqUp{-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;position:absolute;width:100%;top:0;}}.dVtZVI{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;width:100%;}@media (max-width:640px){.dVtZVI{width:calc(100% - 2 * 12px);padding-top:2px;-webkit-flex:100;-ms-flex:100;flex:100;}}.bnTEbp{text-align:center;font-family:Inter,Arial,sans-serif;color:black;line-height:15px;font-weight:700;font-size:12px;}@media (max-width:640px){.bnTEbp{width:calc(100% - 2 * 12px);font-size:10px;line-height:12px;}}.jDWNHy{text-align:center;font-family:Inter,Arial,sans-serif;font-weight:500;color:#757575;font-size:12px;line-height:18px;}@media (max-width:640px){.jDWNHy{width:calc(100% - 100px);font-size:9px;line-height:11px;}}.jiGQVR{-webkit-flex:1;-ms-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;height:100%;margin:0;min-width:250px;}@media (max-width:640px){.jiGQVR{min-width:inherit;}}.fbIfmi{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;width:40px;height:40px;margin:0 4px;border-radius:20px;font-size:18px;border:1px solid #cbcbcb;background-color:rgba(255,255,255,0.7);-webkit-tap-highlight-color:rgba(0,0,0,0);}.fbIfmi:last-child{margin-right:14px;}.fbIfmi:first-child{margin-left:14px;}.fbIfmi.open{border-color:black;}.fbIfmi:focus{border-color:#666;}.fbIfmi:hover{background-color:#fafafa;}.fbIfmi:active{background-color:#eee;}.fbIfmi.selected{background-color:#eee;}.fbIfmi.selected:hover{background-color:#eaeaea;}.fbIfmi.selected:active{background-color:#dadada;}.fbIfmi img{pointer-events:none;}.eZiRFz{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;margin-left:20px;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;}.ciofVT{position:absolute;background-color:blue;-webkit-transition:opacity 0.35s ease;transition:opacity 0.35s ease;background-color:#333;color:white;font-family:Inter,Arial,sans-serif;font-size:14px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;font-weight:bold;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;padding:12px 24px;top:56px;z-index:10;right:16px;border-radius:24px;}.DyazL{color:black;-webkit-text-decoration:none;text-decoration:none;font-family:Inter,Arial,sans-serif;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:baseline;-webkit-box-align:baseline;-ms-flex-align:baseline;align-items:baseline;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;width:100%;border-radius:100px;padding:12px 0px;font-weight:600;font-size:16px;border:1px solid #cbcbcb;margin:4px 0;}.DyazL:visited{color:black;}.DyazL img{margin-right:8px;-webkit-align-self:center;-ms-flex-item-align:center;align-self:center;}.DyazL:hover{border:1px solid #aaa;background-color:#fafafa;}.DyazL:active{background-color:#f0f0f0;}.DyazL.primary{color:white;background-color:black;border-color:transparent;}.DyazL.primary:hover{background-color:#222;}.DyazL.primary:active{background-color:#111;}.DyazL.compact-only{display:none;}@media (max-width:640px){.DyazL.compact-only{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}}.DyazL.wide-only{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}@media (max-width:640px){.DyazL.wide-only{display:none;}}body{background-color:#fff;touch-action:none;overscroll-behavior:none;}::backdrop{background-color:#fff;}#home-link{color:#000;}.zoomable-image{cursor:pointer;}.next-section-or-chapter-link{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;height:92px;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;padding:0 24px;margin-top:18px;border-top:1px solid #EEEEEE;}.next-section-or-chapter-link nav{-webkit-flex:1;-ms-flex:1;flex:1;width:100%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;box-sizing:content-box;padding:0 24px;max-width:650px;}.next-section-or-chapter-link nav .info{-webkit-flex:1;-ms-flex:1;flex:1;min-width:0;word-spacing:normal;line-height:1.45;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;height:100%;-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;margin-right:12px;}.next-section-or-chapter-link nav a{width:64px;height:40px;padding:0px 14px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;border-radius:20px;background-color:black;-webkit-text-decoration:none;text-decoration:none;color:white;font-family:Inter,Arial,sans-serif;line-height:40px;font-weight:bold;font-size:14px;}.next-section-or-chapter-link nav a:visited{color:white;}.next-section-or-chapter-link nav a:hover{background:#222;}.next-section-or-chapter-link nav .info label{font-family:Inter,Arial,sans-serif;font-weight:500;font-size:12px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#545454;width:100%;}.next-section-or-chapter-link nav .info label:first-child{color:black;font-weight:700;font-size:14px;}.hzQSvz{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-flex:1;-ms-flex:1;flex:1;width:100%;height:100%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;}.kjVNVp{pointer-events:auto;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;width:100%;-webkit-align-self:center;-ms-flex-item-align:center;align-self:center;height:70px;position:relative;background-color:white;border-bottom:1px solid #cbcbcb;}@media (max-width:640px){.kjVNVp{height:60px;border-bottom:none;}}.kjVNVp.show-border{border-bottom:1px solid #cbcbcb;}.kxtNJj{position:absolute;top:70px;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;border-radius:14px;border:1px solid #afafaf;box-shadow:0px 2px 14px rgba(0,0,0,0.1);font-family:Inter,Arial,sans-serif;background-color:white;font-size:14px;z-index:100;padding:0;color:black;opacity:0;pointer-events:none;-webkit-transition:opacity 0.15s ease;transition:opacity 0.15s ease;outline-style:none;max-height:calc(100vh - 162px);overflow-x:hidden;overflow-y:auto;max-width:calc(min(100vw - 32px,400px));}.kxtNJj.open{pointer-events:auto;opacity:1;}.kxtNJj.settings{padding:0;}.bbwqHd{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;padding:16px 16px 0 16px;}.iBjcUr{display:block;cursor:pointer;}.iBjcUr img{width:100px;border:#ddd 1px solid;box-shadow:0px 4px 4px rgba(128,128,128,0.4);}.bsUoQu{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;height:135px;padding:0px 28px 0 16px;}.bcZPDT{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;}.bTzPRQ{font-family:'Valkyrie B';font-size:18px;font-weight:600;color:black;font-family:Inter,Arial,sans-serif;}.esKGkH{font-size:16px;margin-top:4px;font-family:Inter,Arial,sans-serif;font-weight:normal;color:#757575;}.KLaMC{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;text-align:left;white-space:inherit;font-family:'Suisse Works';color:black;font-size:18px;padding:28px 12px 12px 24px;border-top:1px solid #e2e2e2;width:100%;font-weight:bold;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;}@media (max-width:640px){.KLaMC{font-size:16px;}}.kifwbK{-moz-appearance:none;-webkit-appearance:none;outline-style:none;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;white-space:nowrap;padding:0;margin:0;border:0;background-color:transparent;white-space:nowrap;-webkit-text-decoration:none;text-decoration:none;-webkit-text-decoration:none;text-decoration:none;font-family:Inter,Arial,sans-serif;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;width:100%;padding:12px 24px;cursor:pointer;color:black;border-top:1px solid #e2e2e2;font-size:14px;-webkit-tap-highlight-color:rgba(0,0,0,0);}.kifwbK.first{margin-top:12px;}.kifwbK:last-child{border-radius:0 0 12px 12px;}.kifwbK:hover{background-color:#fafafa;}.kifwbK:active{background-color:#eee;}.kifwbK.selected{background-color:#eee;}.kifwbK.selected:hover{background-color:#eaeaea;}.kifwbK.selected:active{background-color:#dadada;}.kifwbK.selected div:first-child{font-weight:600;}.ipEjxx{margin-right:32px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;min-width:0;white-space:normal;text-align:left;}.dZYBot{color:#afafaf;}</style><script async="" src="./The Network State in One Essay _ The Network State_files/modules.f0cd1ed70b545da08b60.js" charset="utf-8"></script><style type="text/css">iframe#_hjRemoteVarsFrame {display: none !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important;}</style></head>
+
+  <body style="display: flex; flex-direction: column; justify-content: center; margin: 0; padding: 0; overflow: hidden; background-color: white;">
+    
+<nav class="toc"> 
+              <li>
+              <a id="chapter-1" href="https://thenetworkstate.com/quickstart">Quickstart</a>
+              <ul>
+                 
+              <li>
+              <a id="preamble" href="https://thenetworkstate.com/preamble">Preamble</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-network-state-in-one-sentence" href="https://thenetworkstate.com/the-network-state-in-one-sentence">The Network State in One Sentence</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-network-state-in-one-image" href="https://thenetworkstate.com/the-network-state-in-one-image">The Network State in One Image</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-network-state-in-one-thousand-words" href="https://thenetworkstate.com/the-network-state-in-one-thousand-words">The Network State in One Thousand Words</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-network-state-in-one-essay" href="https://thenetworkstate.com/the-network-state-in-one-essay">The Network State in One Essay</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li>
+
+              <li>
+              <a id="chapter-2" href="https://thenetworkstate.com/history-as-trajectory">History as Trajectory</a>
+              <ul>
+                 
+              <li>
+              <a id="prologue" href="https://thenetworkstate.com/prologue">Prologue</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="microhistory-and-macrohistory" href="https://thenetworkstate.com/microhistory-and-macrohistory">Microhistory and Macrohistory</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="political-power-and-technological-truth" href="https://thenetworkstate.com/political-power-and-technological-truth">Political Power and Technological Truth</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="god-state-network" href="https://thenetworkstate.com/god-state-network">God, State, Network</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="people-of-god-people-of-the-state-people-of-the-network" href="https://thenetworkstate.com/people-of-god-people-of-the-state-people-of-the-network">People of God, People of the State, People of the Network</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="if-the-news-is-fake-imagine-history" href="https://thenetworkstate.com/if-the-news-is-fake-imagine-history">If the News is Fake, Imagine History</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="fragmentation-frontier-fourth-turning-future-is-our-past" href="https://thenetworkstate.com/fragmentation-frontier-fourth-turning-future-is-our-past">Fragmentation, Frontier, Fourth Turning, Future Is Our Past</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="left-is-the-new-right-is-the-new-left" href="https://thenetworkstate.com/left-is-the-new-right-is-the-new-left">Left is the New Right is the New Left</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-one-commandment" href="https://thenetworkstate.com/the-one-commandment">The One Commandment</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li>
+
+              <li>
+              <a id="chapter-3" href="https://thenetworkstate.com/the-tripolar-moment">The Tripolar Moment</a>
+              <ul>
+                 
+              <li>
+              <a id="nyt-ccp-btc" href="https://thenetworkstate.com/nyt-ccp-btc">NYT, CCP, BTC</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="the-dated-and-the-timeless" href="https://thenetworkstate.com/the-dated-and-the-timeless">The Dated and the Timeless</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="a-bipolar-america-and-a-tripolar-triangle" href="https://thenetworkstate.com/a-bipolar-america-and-a-tripolar-triangle">A Bipolar America and a Tripolar Triangle</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="moral-power-martial-power-money-power" href="https://thenetworkstate.com/moral-power-martial-power-money-power">Moral Power, Martial Power, Money Power</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="submission-sympathy-sovereignty" href="https://thenetworkstate.com/submission-sympathy-sovereignty">Submission, Sympathy, Sovereignty</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="conflicts-and-alliances" href="https://thenetworkstate.com/conflicts-and-alliances">Conflicts and Alliances</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li>
+
+              <li>
+              <a id="chapter-4" href="https://thenetworkstate.com/decentralization-recentralization">Decentralization, Recentralization</a>
+              <ul>
+                 
+              <li>
+              <a id="the-possible-futures" href="https://thenetworkstate.com/the-possible-futures">The Possible Futures</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="sociopolitical-axes" href="https://thenetworkstate.com/sociopolitical-axes">Sociopolitical Axes</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="technoeconomic-axes" href="https://thenetworkstate.com/technoeconomic-axes">Technoeconomic Axes</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="foreseeable-futures" href="https://thenetworkstate.com/foreseeable-futures">Foreseeable Futures</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="american-anarchy-chinese-control-international-intermediate" href="https://thenetworkstate.com/american-anarchy-chinese-control-international-intermediate">American Anarchy, Chinese Control, International Intermediate</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="victory-conditions-and-surprise-endings" href="https://thenetworkstate.com/victory-conditions-and-surprise-endings">Victory Conditions and Surprise Endings</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="towards-a-recentralized-center" href="https://thenetworkstate.com/towards-a-recentralized-center">Towards a Recentralized Center</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li>
+
+              <li>
+              <a id="chapter-5" href="https://thenetworkstate.com/from-nation-states-to-network-states">From Nation States to Network States</a>
+              <ul>
+                 
+              <li>
+              <a id="why-now" href="https://thenetworkstate.com/why-now">Why Now?</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="on-nation-states" href="https://thenetworkstate.com/on-nation-states">On Nation States</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="on-network-states" href="https://thenetworkstate.com/on-network-states">On Network States</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li>
+
+              <li>
+              <a id="chapter-6" href="https://thenetworkstate.com/appendix">Appendix</a>
+              <ul>
+                 
+              <li>
+              <a id="acknowledgments" href="https://thenetworkstate.com/acknowledgments">Acknowledgments</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="about-1729" href="https://thenetworkstate.com/about-1729">About 1729</a>
+              
+                 
+              
+              </li>
+
+              <li>
+              <a id="footnotes" href="https://thenetworkstate.com/footnotes">Footnotes</a>
+              
+                 
+              
+              </li>
+              </ul>
+              </li> </nav>
+    <main autofocus="" tabindex="0"><div class="wrap">
+
+<h2 id="chapter-1-5">一文总结网络国家</h2>
+<p>光是提设想, 算不得建国. 在这里我们会详尽描述一个和平的, 可复制的工作流,
+  能将一个有共同愿景的线上社区逐步转化为一个有着实体土地和虚拟首都网络国家 - 现行民族国家的新阶段进化版.</p>
+  
+  
+  <p>网络国家公民不屑于隐瞒自己的观点和意图: 我们想要创建全新的国家的目的, 和我们想要一片处女地, 一张白纸, 一个未初始化的文本缓冲区,
+    一个初始的创业公司的目的是一样的. 我们想要抛开历史包袱, 在纯净全新的状态下创造!</p>
+  
+  <p>从财务层面来看, 需要全新环境的原因是非常清晰的. 人们每年购买<a href="https://www.reonomy.com/blog/post/national-vacant-land-sales-report" target="_blank">几百万英亩的空白地块</a>,
+    <a href="https://corp.delaware.gov/stats/" target="_blank">注册几十万家新公司实体</a>, 全为了获得这一纯净状态.
+    如今, 不止是注册新的公司实体, 我们已经又获得了发起新的社区, 甚至发行<a href="https://coinmarketcap.com/all/views/all/" target="_blank">新货币</a>的能力.
+    人们已经对这些全新的创造方式趋之若鹜, 甘之如饴了.
+  </p>
+  
+  <p>从社会层面来看, 全新环境的价值也是清晰的. 过去几十年间, 单单是在技术行业, 创建新公司的自由就已经在社会上创造了万亿级别的公司市值.
+    想象我们如果生活在这样一个世界, 如果要在纸上写东西, 就必须先把纸上之前的东西
+    <a href="https://en.wikipedia.org/wiki/Noli_turbare_circulos_meos!" target="_blank">擦掉</a>,
+    要盖楼就必须要先拆掉一栋旧楼, 不许注册新公司只能重组一家壳公司, 那么纸张, 土地, 公司都会成为稀缺资源, 纠纷和内耗将是巨大的.
+  </p>
+  <p>
+    等等, 好像都不需要想象 - 这不就是我们当下生活着的世界? 远古时代, 人们只能在<a href="https://en.wikipedia.org/wiki/Clay_tablet#Uses_of_clay_tablets" target="_blank">泥板</a>上用楔形文字刻下永远,
+    不远的几十年前, 在一些国家<a href="https://www.npr.org/sections/money/2012/01/20/145360447/the-secret-document-that-transformed-china" target="_blank">创立私人公司私营经济</a>最高可判处死刑,
+    而就在现在, 旧金山的人们也在为是否要取代掉一间<a href="https://www.kron4.com/news/bay-area/future-of-san-francisco-gas-station-up-for-debate/" target="_blank">古老的加油站</a>而争执不休.
+  </p>
+<p>
+  这恰恰就是当下社会, 对于国家 / 城市 / 民族 / 政府 / 以及大部分实体世界建构的现状. 由于建立新国家是不可想象的, 人们困于已有的旧建构, 争斗不休.
+</p>
+<p>也许我们能改变这一切.</p>
+
+<h3 id="how-to-start-a-new-country">如何建立新国家&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#how-to-start-a-new-country"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h3>
+<p>
+  有至少六种方式能够建立新国家. 有三种是更惯常的, 另三种是更离经叛道的.
+  我们会介绍所有这六个方式, 最终引出我们设想的第七种解决方案.
+</p>
+<h4 id="1.-election">1. 选举&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#1.-election"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>最通常的建立新国家的方式是通过在选举中赢得多数选票支持. 之后通过<a href="https://en.wikipedia.org/wiki/New_Deal" target="_blank">修改</a>旧国家中既有法律,
+  或从旧国家中基于国际社会的承认再建立<a href="https://en.wikipedia.org/wiki/1999_East_Timorese_independence_referendum" target="_blank">新</a>的<a href="https://en.wikipedia.org/wiki/2011_South_Sudanese_independence_referendum" target="_blank">国家</a>.
+  这是一条被讨论最多, 也是最常用最拥挤的路径 - 也许已经<a href="https://en.wikipedia.org/wiki/Mimetic_theory" target="_blank">太拥挤</a>了.
+</p>
+<h4 id="2.-revolution">2. Revolution&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#2.-revolution"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>The second obvious way is a <a href="https://www.history.com/this-day-in-history/ussr-established" target="_blank">political</a> <a href="https://en.wikipedia.org/wiki/French_Revolution" target="_blank">revolution</a>. We don’t advise
+attempting this. Particularly momentous elections are sometimes
+referred to as <a href="http://pressbooks-dev.oer.hawaii.edu/ushistory/chapter/the-reagan-revolution/" target="_blank">revolutions</a>, though a revolution frequently involves
+bloodshed. Revolutions are infrequent, but everyone knows that they
+mean a new government.</p>
+<h4 id="3.-war">3. War&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#3.-war"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>The third conventional way to form a new state is to win a war.  We
+don’t advise attempting this either. A war is, of course, not
+independent from the other two. Indeed, both <a href="https://en.wikipedia.org/wiki/March_1933_German_federal_election" target="_blank">elections</a> and <a href="https://en.wikipedia.org/wiki/Russian_Revolution" target="_blank">revolutions</a>
+can lead to <a href="https://en.wikipedia.org/wiki/World_War_II" target="_blank">wars</a> that end up carving out <a href="https://en.wikipedia.org/wiki/Post-occupation_Japan" target="_blank">new</a> <a href="https://en.wikipedia.org/wiki/Aftermath_of_World_War_II" target="_blank">polities</a>.  Like a
+revolution, a war is infrequent and undesirable, but is a means by
+which to redraw state borders.</p>
+<h4 id="4.-micronations">4. Micronations&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#4.-micronations"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>Now we get to the unconventional. The most obvious of the
+unconventional approaches – and the one most people think of when
+they hear the concept of “starting a new country” – occurs when an
+eccentric plants a flag on an <a href="https://en.wikipedia.org/wiki/Principality_of_Sealand" target="_blank">offshore platform</a> or disputed <a href="https://en.wikipedia.org/wiki/Liberland" target="_blank">patch of
+dirt</a> and declares themselves king of nothing. If the issue with
+elections is that too <em>many</em> people care about them, the issue with
+these so-called <a href="https://medium.com/@sy.park.rk/escaping-the-current-system-5f93cfb07e1a" target="_blank">micronations</a> is that too <em>few</em> people care. Because a
+state (like a currency) is an inherently social affair, a few people
+in the middle of nowhere won’t be able to organize a military, enforce
+laws, or be recognized by other countries. Moreover, while an existing
+state may be content to let people harmlessly<sup><a id="fnr.5" class="footref" href="https://thenetworkstate.com/footnotes#fn.5" role="doc-backlink">5</a></sup> <a href="https://en.wikipedia.org/wiki/Live_action_role-playing_game" target="_blank">LARP</a> a <a href="https://en.wikipedia.org/wiki/List_of_micronations" target="_blank">fake country</a> in
+their backyard, an actual threat to sovereignty typically produces a
+response with real guns, whether that be the <a href="https://en.wikipedia.org/wiki/Falklands_War" target="_blank">Falklands</a> or <a href="https://en.wikipedia.org/wiki/Sakhalin#Division_along_50th_parallel" target="_blank">Sakhalin</a>.</p>
+<h4 id="5.-seasteading">5. Seasteading&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#5.-seasteading"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>Here is where things start to get interesting. Conceived by Patri
+Friedman and backed by Peter Thiel, <a href="https://www.seasteading.org/" target="_blank">seasteading</a> essentially starts
+with the observation that cruise ships <a href="https://edition.cnn.com/travel/article/iona-cruise-ship-assembly-video/index.html" target="_blank">exist</a>, and asks whether we
+could move from a few weeks on the water at a time to semi-permanent
+habitation in international waters (with frequent docking, of
+course). If the cost of cruise ships <a href="https://www.businesstimes.com.sg/transport/the-messy-booming-business-of-recycling-cruise-ships" target="_blank">falls</a>, this approach becomes more
+feasible. But while there are individuals who live on cruise ships
+<a href="https://www.cruisecritic.com.au/articles.cfm?ID=5041&amp;stay=1&amp;posfrom=1" target="_blank">year-round</a>, we haven’t yet seen a scaled example.<sup><a id="fnr.6" class="footref" href="https://thenetworkstate.com/footnotes#fn.6" role="doc-backlink">6</a></sup></p>
+<h4 id="6.-space">6. Space&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#6.-space"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>Perhaps the most prestigious of the start-a-new-country
+paths is the idea of colonizing other planets. Unlike seasteading or
+micronations, space exploration started at the government level and
+has been glamorized in many movies and TV shows, so it enjoys a higher
+degree of social acceptability. This path is typically received as
+temporarily technically infeasible, rather than outright crazy. Elon
+Musk’s SpaceX is one entity seriously <a href="https://www.reddit.com/r/Starlink/comments/jjc270/found_a_gem_in_the_starlink_tos_the_parties/" target="_blank">contemplating</a> the logistics of
+starting a new state on Mars.</p>
+<h4 id="7.-network-states">7. Network States&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#7.-network-states"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h4>
+<p>And finally we arrive at our preferred method: the network state. Our
+idea is to proceed cloud first, land last. Rather than starting with
+the physical territory, we start with the digital community. We create
+a <a href="https://thenetworkstate.com/on-network-states#startup-societies">startup society</a>, organize it into a <a href="https://thenetworkstate.com/network-union">network union</a>, crowdfund the
+physical nodes of a network archipelago, and — in the fullness of
+time — eventually negotiate for diplomatic recognition to become a
+true network <em>state</em>. We build the embryonic state as an open-source
+project, we organize our internal economy around remote work, we
+cultivate in-person levels of civility, we simulate <a href="https://thewild.com/blog/architect-getting-started-with-vr" target="_blank">architecture in
+VR</a>, and we create art and literature that reflects our values.</p>
+<p>When we crowdfund territory in the real world, it’s not necessarily
+<em>contiguous</em> territory. Because an under-appreciated fact is that <em>the
+internet allows us to network <a href="https://en.wikipedia.org/wiki/Enclave_and_exclave" target="_blank">enclaves</a></em>. Put another way, a network
+archipelago need not acquire all its territory in one place at one
+time. It can connect a thousand apartments, a hundred houses, and a
+dozen cul-de-sacs in different cities into a new kind of fractal
+polity with its capital in the cloud. Community members migrate
+between these enclaves and crowdfund territory nearby, with every
+individual dwelling and group house presenting an independent
+opportunity for expansion. And with a thousand such enclaves, rather than
+four directions to expand (north, east, south, and west), there are
+more like four thousand.</p>
+<p>What we’ve described thus far is much like an ethnic diaspora, in
+which emigrants are internationally dispersed but connected by
+communication channels with each other and the motherland. The twist
+is that our version is a <a href="https://archive.ph/ioJMS#selection-985.96-989.112" target="_blank"><em>reverse diaspora</em></a>: a community that forms
+first on the internet, builds a culture online, and only then comes
+together in-person to build dwellings and structures. In a sense, you
+can think of each physical outpost of this digital community as a
+<em>cloud embassy</em>, similar to the grassroots <a href="https://www.blocksocial.com/orgs/bitcoin-embassies" target="_blank">Bitcoin embassies</a> that have
+arisen around the world to help people better understand Bitcoin. New
+recruits can visit either the virtual or physical parts of a network
+state, beta test it, and decide to leave or stay.</p>
+<p>Now, with all this talk of embassies and countries one might well
+contend that network states, like the aforementioned micronations, are
+also just a <a href="https://en.wikipedia.org/wiki/Live_action_role-playing_game" target="_blank">LARP</a>.  Unlike micronations, however, they are set up to be
+a <em>scaled</em> LARP, a feat of imagination practiced by large numbers of
+people at the same time. And the experience of cryptocurrencies over
+the last decade shows us just how <a href="https://bitcoin.zorinaq.com/price/" target="_blank">powerful</a> such a shared LARP can be.</p>
+<h3 id="minimum-necessary-innovation">Minimum Necessary Innovation&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#minimum-necessary-innovation"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h3>
+<p>Let’s pause and summarize for a second. The main difference between
+the seventh method (network states) and the previous six (election,
+revolution, war, micronations, seasteading, and space) is that the
+seventh straddles the boundary between practicality and
+impracticality.</p>
+<p>It is now feasible to build million-person online communities, start
+billion-dollar digital currencies, and <a href="https://www.archdaily.com/tag/virtual-reality-for-architects" target="_blank">architect buildings in VR</a> to
+then crowdfund into reality. The network state concept stacks together
+many <em>existing</em> technologies, rather than requiring the invention of
+new ones — like Mars-capable rockets, or permanent-habitation
+seasteads. At the same time, it avoids the obvious pathways of
+election, revolution, and war – all of which turn ugly, and none of
+which provide much venue for individual initiative.</p>
+<p>In other words, the network state takes the most robust existing tech
+stack we have – namely, the suite of technologies built around the
+internet – and uses it to route around political roadblocks, without
+waiting for future physical innovation.</p>
+<h3 id="what-counts-as-a-new-country">What Counts as a New Country?&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#what-counts-as-a-new-country"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h3>
+<p>Having outlined these seven methods, the careful reader will notice
+that we have played a bit fast and loose with the definition of what
+a “new country” is.</p>
+<p>First, what do we <em>mean</em> by a new country? One definition is that
+starting a new country means settling a wholly new territory, like
+colonizing Mars. Another definition is that simply changing the form
+of government actually changes the country, like France moving from
+the Second French Republic to the <a href="https://en.wikipedia.org/wiki/Second_French_Empire" target="_blank">Second French Empire</a>. Rather than
+using either these strict or loose definitions, we will use both
+<em>numerical</em> and <em>societal</em> definitions of a new country.</p>
+<p>The <em>numerical</em> definition begins with visualizing a hypothetical
+<code>nationrealestatepop.com</code> site similar to <code>coinmarketcap.com</code>, which
+aggregates the cryptographically audited censuses of startup societies
+aspiring to become network states. This dashboard would show in
+realtime the number of community members, the acreage of real estate
+owned by those members, and the community’s on-chain income. A startup
+society with five million people worldwide, thousands of square miles
+of (discontiguous) community-owned land, and billions in annual income
+would have indisputable numerical significance.</p>
+<p>This in turn leads us to the <em>societal</em> definition: a new country is
+one that is <a href="https://oxford.universitypressscholarship.com/view/10.1093/acprof:oso/9780199248391.001.0001/acprof-9780199248391" target="_blank">diplomatically recognized</a> by other countries as a
+legitimate polity capable of <a href="https://en.wikipedia.org/wiki/Self-determination" target="_blank">self-determination</a>. A state with enough
+such bilateral relationships would have the societal significance to
+gain accession to a group of pre-existing states like <a href="https://asean.org/" target="_blank">ASEAN</a>, the <a href="https://www.oas.org/en/" target="_blank">OAS</a>,
+the <a href="https://en.wikipedia.org/wiki/African_Union" target="_blank">African Union</a>, the EU, or the United Nations.</p>
+<p>This combination of numerical and societal metrics matches the
+emergence of cryptocurrency. Initially ignored, then <a href="https://99bitcoins.com/category/bitcoin-obituaries/2011/" target="_blank">mocked</a> as an
+obvious failure, within five years after its invention Bitcoin
+attained a billion-dollar market capitalization (a <em>numerical</em>
+success) and was subsequently listed on <a href="https://news.ycombinator.com/item?id=5539881" target="_blank">CNBC</a> and <a href="https://techcrunch.com/2013/08/09/bitcoin-ticker-available-on-bloomberg-terminal/" target="_blank">Bloomberg</a> alongside
+blue-chip stocks (a form of <em>societal</em> recognition). At each step
+Bitcoin could keep ascending numerically on its own, with greater
+societal recognition following in its wake. By 2020 it had changed the
+trajectory of the <a href="https://www.bbc.com/news/business-54261382" target="_blank">People’s Bank of China</a>, <a href="https://www.cnbc.com/2019/04/11/cryptocurrencies-fintech-clearly-shaking-the-system-imfs-lagarde.html" target="_blank">the IMF</a>, <a href="https://www.cnbc.com/2020/08/06/goldman-names-new-head-of-digital-assets-in-bet-that-blockchain-is-the-future-of-financial-markets.html" target="_blank">Goldman Sachs</a>, <a href="https://fortune.com/2020/10/26/jp-morgan-chase-bitcoin-predictions-analyst-jpm-cryptocurrency/" target="_blank">JP
+Morgan</a>, and <a href="https://www.coindesk.com/imf-world-bank-g7-countries-to-create-central-bank-digital-currency-rules" target="_blank">the World Bank</a>. By 2021, Bitcoin became <a href="https://twitter.com/nayibbukele/status/1401327906178191366" target="_blank">legal tender</a> in El
+Salvador, a sovereign state. And by mid-2022 the <a href="https://www.bbc.com/news/world-africa-61248809" target="_blank">Central African
+Republic</a> had followed, with <a href="https://twitter.com/nayibbukele/status/1526029996787216387" target="_blank">dozens more</a> considering Bitcoin as legal
+tender, including <a href="https://cointelegraph.com/news/panama-s-president-says-he-won-t-sign-crypto-bill-into-law-at-this-moment" target="_blank">Panama</a>.</p>
+<h3 id="most-countries-are-small-countries">Most Countries are Small Countries&nbsp;<a class="header-anchor" href="https://thenetworkstate.com/the-network-state-in-one-essay#most-countries-are-small-countries"><svg style="pointer-events: none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.77518 3.27494C7.6427 3.41711 7.57057 3.60516 7.574 3.79946C7.57743 3.99376 7.65614 4.17914 7.79355 4.31656C7.93097 4.45397 8.11635 4.53268 8.31065 4.53611C8.50495 4.53954 8.693 4.46742 8.83518 4.33494L10.0852 3.08494C10.271 2.89912 10.4916 2.75171 10.7344 2.65115C10.9772 2.55058 11.2374 2.49882 11.5002 2.49882C11.763 2.49882 12.0232 2.55058 12.266 2.65115C12.5088 2.75171 12.7294 2.89912 12.9152 3.08494C13.101 3.27076 13.2484 3.49136 13.349 3.73414C13.4495 3.97693 13.5013 4.23715 13.5013 4.49994C13.5013 4.76273 13.4495 5.02294 13.349 5.26573C13.2484 5.50851 13.101 5.72911 12.9152 5.91494L10.4152 8.41494C10.2294 8.60089 10.0089 8.74841 9.76606 8.84905C9.52326 8.9497 9.26301 9.00151 9.00018 9.00151C8.73734 9.00151 8.47709 8.9497 8.23429 8.84905C7.9915 8.74841 7.77092 8.60089 7.58518 8.41494C7.443 8.28246 7.25495 8.21033 7.06065 8.21376C6.86635 8.21719 6.68097 8.2959 6.54355 8.43331C6.40614 8.57073 6.32743 8.75611 6.324 8.95041C6.32057 9.14471 6.3927 9.33276 6.52518 9.47494C6.85019 9.79998 7.23604 10.0578 7.6607 10.2337C8.08536 10.4096 8.54052 10.5001 9.00018 10.5001C9.45983 10.5001 9.91499 10.4096 10.3397 10.2337C10.7643 10.0578 11.1502 9.79998 11.4752 9.47494L13.9752 6.97494C14.6316 6.31852 15.0004 5.42824 15.0004 4.49994C15.0004 3.57163 14.6316 2.68135 13.9752 2.02494C13.3188 1.36852 12.4285 0.999756 11.5002 0.999756C10.5719 0.999756 9.68159 1.36852 9.02517 2.02494L7.77518 3.27494ZM3.08518 12.9149C2.89922 12.7291 2.7517 12.5086 2.65106 12.2658C2.55041 12.023 2.4986 11.7627 2.4986 11.4999C2.4986 11.2371 2.55041 10.9768 2.65106 10.734C2.7517 10.4912 2.89922 10.2706 3.08518 10.0849L5.58518 7.58494C5.77092 7.39898 5.9915 7.25146 6.23429 7.15082C6.47709 7.05017 6.73734 6.99836 7.00018 6.99836C7.26301 6.99836 7.52326 7.05017 7.76606 7.15082C8.00885 7.25146 8.22943 7.39898 8.41518 7.58494C8.55735 7.71742 8.7454 7.78954 8.9397 7.78611C9.134 7.78268 9.31938 7.70397 9.4568 7.56656C9.59421 7.42914 9.67292 7.24376 9.67635 7.04946C9.67978 6.85516 9.60766 6.66711 9.47518 6.52494C9.15017 6.19989 8.76431 5.94205 8.33965 5.76614C7.91499 5.59023 7.45983 5.49968 7.00018 5.49968C6.54052 5.49968 6.08536 5.59023 5.6607 5.76614C5.23604 5.94205 4.85019 6.19989 4.52518 6.52494L2.02518 9.02493C1.36876 9.68135 1 10.5716 1 11.4999C1 12.4282 1.36876 13.3185 2.02518 13.9749C2.68159 14.6313 3.57187 15.0001 4.50018 15.0001C5.42848 15.0001 6.31876 14.6313 6.97518 13.9749L8.22518 12.7249C8.35766 12.5827 8.42978 12.3947 8.42635 12.2004C8.42292 12.0061 8.34421 11.8207 8.2068 11.6833C8.06938 11.5459 7.884 11.4671 7.6897 11.4637C7.4954 11.4603 7.30735 11.5324 7.16518 11.6649L5.91518 12.9149C5.72943 13.1008 5.50885 13.2484 5.26606 13.349C5.02326 13.4497 4.76301 13.5015 4.50018 13.5015C4.23734 13.5015 3.97709 13.4497 3.73429 13.349C3.4915 13.2484 3.27092 13.1008 3.08518 12.9149Z" fill="#757575"></path>
+</svg></a></h3>
+<p>Cryptocurrency could achieve these heights because money has both
+numerical and societal aspects.<sup><a id="fnr.7" class="footref" href="https://thenetworkstate.com/footnotes#fn.7" role="doc-backlink">7</a></sup> The numbers could be piled up
+before the societal accolades followed. Once Bitcoin had proven that
+it couldn’t be easily counterfeited or hacked, the shared belief of
+the <a href="https://cointelegraph.com/news/100m-people-worldwide-now-use-crypto-based-assets-says-cambridge-study" target="_blank">millions</a> of cryptocurrency holders worldwide was enough to get BTC
+from a value of zero to a market cap of billions, and from there to a
+listing on every Bloomberg Terminal and exchange. Societal traction of
+this kind paved the way for more numerical traction, and a virtuous
+cycle followed.</p>
+<p>Could a startup society follow a similar path? Yes. A
+<a href="https://chainlinktoday.com/balaji-srinivasan-explains-the-pivotal-shift-from-fiat-information-to-cryptoinformation/" target="_blank">cryptographically auditable</a> census could prove that a growing startup
+society had 1-10M committed digital citizens, large cryptocurrency
+reserves, years of continuous existence, and physical holdings all
+over the earth. That numerical traction could then be used to achieve
+the societal traction of diplomatic recognition.</p>
+<p>Why? Because most countries are small countries. A new state with a
+population of 1-10M would actually be <a href="https://en.wikipedia.org/wiki/List_of_countries_by_population_" target="_blank">comparable</a> to most existing
+states. That’s because of the <a href="https://www.un.org/en/about-us/growth-in-un-membership" target="_blank">193 UN-recognized sovereign states</a>, 20%
+have a population of less than 1M and 55% have a population of less
+than 10M. This includes many countries typically thought of as
+legitimate, such as Luxembourg (615k), Cyprus (1.2M), Estonia (1.3M),
+New Zealand (4.7M), Ireland (4.8M), and Singapore (5.8M). These “user
+counts” are surprisingly small by tech standards!</p>
+<p><span style="display: block; padding: 24px 4px; width: 100%; margin: 0 0%;"><img style="width: 100%" src="./The Network State in One Essay _ The Network State_files/what-counts-as-a-country-v5-grayscale.png" alt="Country Population Histogram" class="zoomable-image"></span></p>
+<p>Of course, mere quantity is not everything. The strength of
+affiliation to our hypothetical network state matters, as does the
+<a href="https://archive.ph/Ovzmj" target="_blank">time</a> on the property, the percentage of <a href="https://www.quora.com/What-percentage-of-net-worth-should-be-invested-in-crypto-or-Bitcoin" target="_blank">net worth</a> stored in the
+currency, and the <a href="https://www.wsj.com/articles/most-teens-prefer-to-chat-online-than-in-person-survey-finds-1536597971" target="_blank">fraction</a> of contacts found in the community.</p>
+<p>Still, once we remember that Facebook has <span style="white-space: nowrap">3B+</span> users, Twitter has
+300M+, and many individual influencers have <span style="white-space: nowrap">1M+</span> followers, it starts
+to be not too crazy to imagine we can build a 1-10M person startup
+society with a genuine sense of national consciousness, an integrated
+cryptocurrency, and a plan to crowdfund many pieces of territory
+around the world. With the internet, we can digitally sew these
+disjoint enclaves together into a new kind of polity that achieves
+diplomatic recognition: a <strong>network state</strong>.</p>
+
+<p style="page-break-before: always; break-before: column; -webkit-column-break-before: always;"></p>
+</div><div class="next-section-or-chapter-link">
+                <nav>
+                    <div class="info">
+                        <label>Next Chapter:</label>
+                        <label>History as Trajectory</label>
+                    </div>
+                    <a href="https://thenetworkstate.com/prologue">
+                        Next&nbsp;
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.21967 3.21967C6.51256 2.92678 6.98744 2.92678 7.28033 3.21967L11.5303 7.46967C11.8232 7.76256 11.8232 8.23744 11.5303 8.53033L7.28033 12.7803C6.98744 13.0732 6.51256 13.0732 6.21967 12.7803C5.92678 12.4874 5.92678 12.0126 6.21967 11.7197L9.93934 8L6.21967 4.28033C5.92678 3.98744 5.92678 3.51256 6.21967 3.21967Z" fill="white"></path>
+                        </svg>
+                    </a>
+                </nav>
+            </div></main><div id="speechify-global-notifications"></div><div id="speechify-summarization-fullscreen-mode" style="position: fixed; inset: 0px; overflow: auto; background: white; z-index: 1999; display: none;"></div><div id="speechify-screenshot-mode" style="position: fixed; top: 0px; right: 0px; width: 100%; min-height: 100%; z-index: 9999; display: none;"></div>
+
+    
+    <div style="pointer-events: none; display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0;" id="root"><div class="sc-iIPllB hzQSvz"><div aria-hidden="true" class="sc-iBkjds gKUdVL" style="visibility: hidden;"><div class="sc-ftvSup XgJTT" style="visibility: hidden;"><img src="./The Network State in One Essay _ The Network State_files/flag.svg" class="sc-kDDrLX bgyqUi"><div class="sc-papXJ fqXGQj">What's your email?</div><div class="sc-jqUVSM cGGRcu">Get new book chapters and updates for free.</div><form class="sc-dkzDqf hYNUlc"><div class="sc-jSMfEi jiAFJv"><input id="subscribe-input" required="" aria-label="Subscribe to email updates email input text field" placeholder="Type your email..." type="email" class="sc-eCYdqJ ODxyB" value=""></div><button type="submit" aria-label="Subscribe to email updates submit" class="sc-hKMtZM bRCNAF">Subscribe</button></form></div></div><header class="sc-gicCDI kjVNVp"><div aria-hidden="true" role="menubar" class="sc-fEOsli jiGQVR" style="visibility: visible;"><a id="home-link" aria-label="Home" href="https://thenetworkstate.com/" class="sc-idiyUo eZiRFz"><svg width="220" height="26" viewBox="0 0 220 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.1051 21.4517C41.6939 21.3928 42.1503 21.3192 42.4743 21.2309C42.7979 21.1278 43.0333 20.9807 43.1807 20.7893C43.3426 20.5832 43.4382 20.3109 43.4676 19.9724C43.5118 19.6338 43.5338 19.1849 43.5338 18.6255V6.57027H42.9818C42.2018 6.57027 41.5321 6.67328 40.9727 6.87937C40.4134 7.07072 39.9202 7.37982 39.4936 7.80668C39.0666 8.21883 38.6911 8.74873 38.3675 9.3964C38.0582 10.0293 37.764 10.7874 37.4842 11.6706H37.0425L37.7052 5.77539C38.5587 5.80485 39.4565 5.82691 40.3987 5.84162C41.3556 5.84162 42.2165 5.84162 42.9818 5.84162H47.0886C47.8542 5.84162 48.7078 5.84162 49.65 5.84162C50.6066 5.82691 51.5194 5.80485 52.3876 5.77539L53.05 11.6706H52.5866C52.3214 10.7874 52.0272 10.0293 51.7032 9.3964C51.3943 8.74873 51.0262 8.21883 50.5992 7.80668C50.1723 7.37982 49.6721 7.07072 49.098 6.87937C48.5387 6.67328 47.8763 6.57027 47.1107 6.57027H46.5586V18.6255C46.5586 19.1849 46.5734 19.6338 46.6028 19.9724C46.6473 20.3109 46.7429 20.5832 46.89 20.7893C47.0518 20.9807 47.2949 21.1278 47.6185 21.2309C47.9425 21.3192 48.3989 21.3928 48.9873 21.4517V21.8491H41.1051V21.4517Z" fill="black"></path><path d="M57.4693 11.9354C57.69 11.6557 57.911 11.3834 58.1317 11.1184C58.3674 10.8535 58.6175 10.6254 58.8823 10.434C59.1621 10.2279 59.4711 10.066 59.8098 9.94824C60.1485 9.83048 60.5383 9.7716 60.98 9.7716C61.4511 9.7716 61.8851 9.85258 62.2826 10.0145C62.6948 10.1764 63.0479 10.434 63.3425 10.7872C63.6514 11.1258 63.8945 11.56 64.071 12.0899C64.2476 12.6198 64.3362 13.2454 64.3362 13.9667V18.6696C64.3362 19.2436 64.3435 19.6999 64.3582 20.0385C64.3876 20.377 64.4538 20.642 64.5568 20.8333C64.6745 21.0247 64.851 21.1645 65.0868 21.2528C65.3221 21.3412 65.6608 21.4074 66.1025 21.4516V21.849H60.0084V21.4516C60.3912 21.4074 60.6854 21.3412 60.8917 21.2528C61.0977 21.1645 61.2521 21.0247 61.3555 20.8333C61.4584 20.642 61.5173 20.377 61.532 20.0385C61.5467 19.6999 61.5541 19.2436 61.5541 18.6696V14.4966C61.5541 12.5978 60.8697 11.6484 59.5005 11.6484C59.0739 11.6484 58.6763 11.7293 58.3082 11.8912C57.9552 12.0384 57.6753 12.2592 57.4693 12.5536V18.6696C57.4693 19.2436 57.4767 19.6999 57.4914 20.0385C57.5061 20.377 57.565 20.642 57.6679 20.8333C57.7713 21.0247 57.9257 21.1645 58.1317 21.2528C58.338 21.3412 58.6322 21.4074 59.015 21.4516V21.849H52.9209V21.4516C53.3626 21.4074 53.7013 21.3412 53.9366 21.2528C54.1724 21.1645 54.3415 21.0247 54.4445 20.8333C54.5622 20.642 54.6284 20.377 54.6431 20.0385C54.6725 19.6999 54.6872 19.2436 54.6872 18.6696V7.65201C54.6872 7.13682 54.6725 6.73938 54.6431 6.45973C54.6137 6.18005 54.5328 5.97399 54.4004 5.84149C54.2827 5.70902 54.1058 5.62808 53.8704 5.59862C53.6351 5.5692 53.3184 5.5471 52.9209 5.53239V5.15705L57.5355 3.67773C57.5208 4.26652 57.5061 4.9436 57.4914 5.70902C57.4767 6.47444 57.4693 7.42385 57.4693 8.55725V11.9354Z" fill="black"></path><path d="M71.426 22.1359C70.5577 22.1359 69.7847 21.9887 69.1076 21.6943C68.4306 21.3999 67.8639 20.9878 67.4075 20.4579C66.9514 19.928 66.6054 19.3024 66.37 18.5811C66.1343 17.8452 66.0166 17.0503 66.0166 16.1966C66.0166 15.3281 66.1637 14.5038 66.4583 13.7237C66.7525 12.9436 67.15 12.2664 67.6506 11.6924C68.1658 11.1036 68.7546 10.6399 69.4169 10.3014C70.094 9.94812 70.8151 9.77148 71.5805 9.77148C72.2431 9.77148 72.854 9.87453 73.4134 10.0806C73.9874 10.2867 74.4802 10.5884 74.8925 10.9859C75.3195 11.3833 75.6578 11.8838 75.9082 12.4872C76.173 13.076 76.3275 13.7605 76.372 14.5406H68.4894V14.7172C68.4894 15.6151 68.5998 16.3953 68.8208 17.0577C69.0561 17.72 69.3654 18.272 69.7479 18.7136C70.1307 19.1405 70.5798 19.4643 71.095 19.6851C71.6249 19.8911 72.1916 19.9942 72.7951 19.9942C73.5458 19.9942 74.2007 19.8764 74.7601 19.6409C75.3342 19.3907 75.7979 19.0816 76.151 18.7136L76.4161 18.9344C76.2245 19.2582 75.9818 19.6115 75.6872 19.9942C75.393 20.3622 75.0396 20.7081 74.6277 21.0319C74.2302 21.341 73.7591 21.606 73.2144 21.8268C72.6845 22.0328 72.0883 22.1359 71.426 22.1359ZM71.2495 10.6326C70.4547 10.6326 69.8292 10.9049 69.3728 11.4495C68.9311 11.9942 68.6516 12.7301 68.5336 13.6575H73.5899C73.5458 12.5976 73.3027 11.8322 72.8613 11.3612C72.4344 10.8755 71.8971 10.6326 71.2495 10.6326Z" fill="black"></path><path d="M94.7176 9.06537C94.7176 8.49133 94.7029 8.03501 94.6734 7.69645C94.644 7.35792 94.5557 7.09295 94.4086 6.90161C94.2759 6.71026 94.0626 6.57044 93.7684 6.4821C93.4738 6.3938 93.0615 6.31282 92.5319 6.23923V5.8418H97.9413V6.23923C97.4114 6.31282 96.9991 6.3938 96.7049 6.4821C96.4104 6.57044 96.1897 6.71026 96.0422 6.90161C95.9098 7.09295 95.8289 7.35792 95.7995 7.69645C95.7701 8.03501 95.7554 8.49133 95.7554 9.06537V21.8493H93.9008L84.4949 9.68361V18.6257C84.4949 19.1998 84.5096 19.6561 84.5391 19.9946C84.5685 20.3332 84.6494 20.5981 84.7821 20.7895C84.9292 20.9808 85.1499 21.128 85.4445 21.2311C85.7387 21.3194 86.1509 21.393 86.6809 21.4519V21.8493H81.2715V21.4519C81.8014 21.393 82.2133 21.3194 82.5079 21.2311C82.8021 21.128 83.0158 20.9808 83.1482 20.7895C83.2953 20.5981 83.3836 20.3332 83.413 19.9946C83.4424 19.6561 83.4571 19.1998 83.4571 18.6257V8.33676L83.082 7.85102C82.6991 7.33582 82.3752 6.96049 82.1104 6.72497C81.8603 6.47475 81.5804 6.29076 81.2715 6.173V5.8418H85.3783L94.7176 17.8529V9.06537Z" fill="black"></path><path d="M103.389 22.1359C102.521 22.1359 101.748 21.9887 101.071 21.6943C100.393 21.3999 99.8268 20.9878 99.3704 20.4579C98.9143 19.928 98.5683 19.3024 98.3329 18.5811C98.0972 17.8452 97.9795 17.0503 97.9795 16.1966C97.9795 15.3281 98.1266 14.5038 98.4212 13.7237C98.7154 12.9436 99.1129 12.2664 99.6134 11.6924C100.129 11.1036 100.717 10.6399 101.38 10.3014C102.057 9.94812 102.778 9.77148 103.543 9.77148C104.206 9.77148 104.817 9.87453 105.376 10.0806C105.95 10.2867 106.443 10.5884 106.855 10.9859C107.282 11.3833 107.621 11.8838 107.871 12.4872C108.136 13.076 108.29 13.7605 108.335 14.5406H100.452V14.7172C100.452 15.6151 100.563 16.3953 100.784 17.0577C101.019 17.72 101.328 18.272 101.711 18.7136C102.094 19.1405 102.543 19.4643 103.058 19.6851C103.588 19.8911 104.155 19.9942 104.758 19.9942C105.509 19.9942 106.164 19.8764 106.723 19.6409C107.297 19.3907 107.761 19.0816 108.114 18.7136L108.379 18.9344C108.187 19.2582 107.945 19.6115 107.65 19.9942C107.356 20.3622 107.003 20.7081 106.591 21.0319C106.193 21.341 105.722 21.606 105.177 21.8268C104.647 22.0328 104.051 22.1359 103.389 22.1359ZM103.212 10.6326C102.418 10.6326 101.792 10.9049 101.336 11.4495C100.894 11.9942 100.614 12.7301 100.496 13.6575H105.553C105.509 12.5976 105.266 11.8322 104.824 11.3612C104.397 10.8755 103.86 10.6326 103.212 10.6326Z" fill="black"></path><path d="M112.793 22.1366C112.337 22.1366 111.932 22.0703 111.579 21.9379C111.226 21.8201 110.924 21.6214 110.674 21.3417C110.438 21.062 110.254 20.694 110.122 20.2377C110.004 19.7814 109.945 19.2221 109.945 18.5597V10.9424H108.068V9.97089H109.989V8.27077L112.727 6.19531V9.97089H115.62V10.9424H112.727V18.096C112.727 18.5229 112.734 18.8909 112.749 19.2C112.779 19.5091 112.837 19.7667 112.926 19.9728C113.029 20.1641 113.169 20.304 113.345 20.3923C113.537 20.4806 113.802 20.5248 114.14 20.5248C114.435 20.5248 114.722 20.4732 115.001 20.3702C115.281 20.2672 115.59 20.0906 115.929 19.8403L116.15 20.039C115.943 20.2893 115.737 20.5395 115.531 20.7897C115.325 21.04 115.09 21.2681 114.824 21.4742C114.574 21.6655 114.28 21.8201 113.941 21.9379C113.618 22.0703 113.235 22.1366 112.793 22.1366Z" fill="black"></path><path d="M123.904 13.7242L121.232 22.026H119.841L116.53 11.8474C116.368 11.3617 116.191 11.0084 116 10.7876C115.823 10.5521 115.507 10.4123 115.05 10.3681V9.9707H120.857V10.3681C120.445 10.3976 120.136 10.4564 119.93 10.5447C119.724 10.6184 119.584 10.7287 119.51 10.8759C119.452 11.0084 119.437 11.1777 119.466 11.3838C119.51 11.5898 119.577 11.8327 119.665 12.1124L121.475 18.2725L124.081 9.9707H125.538L128.055 18.3167L129.667 13.1722C129.843 12.6128 129.961 12.1565 130.02 11.8033C130.094 11.45 130.101 11.1703 130.042 10.9642C129.983 10.7582 129.858 10.6184 129.667 10.5447C129.49 10.4564 129.24 10.3976 128.916 10.3681V9.9707H132.912V10.3681C132.633 10.3976 132.397 10.4491 132.206 10.5227C132.029 10.5816 131.867 10.692 131.72 10.8538C131.588 11.0011 131.463 11.2071 131.345 11.4721C131.227 11.7223 131.102 12.0462 130.97 12.4436L127.901 22.026H126.487L123.904 13.7242Z" fill="black"></path><path d="M137.948 10.5664C137.447 10.5664 137.02 10.6841 136.667 10.9196C136.314 11.1551 136.019 11.479 135.784 11.8911C135.563 12.3033 135.401 12.789 135.298 13.3483C135.195 13.9077 135.144 14.5112 135.144 15.1588C135.144 15.6887 135.195 16.3143 135.298 17.0356C135.416 17.7421 135.6 18.4192 135.85 19.0669C136.115 19.6998 136.461 20.2371 136.888 20.6787C137.33 21.1202 137.874 21.341 138.522 21.341C139.007 21.341 139.427 21.2233 139.78 20.9878C140.133 20.7375 140.421 20.399 140.641 19.9721C140.862 19.5452 141.024 19.0521 141.127 18.4928C141.23 17.9335 141.282 17.33 141.282 16.6823C141.282 16.1671 141.223 15.5563 141.105 14.8497C141.002 14.1432 140.826 13.4735 140.575 12.8405C140.325 12.2076 139.979 11.6703 139.537 11.2287C139.111 10.7871 138.581 10.5664 137.948 10.5664ZM138.146 9.77148C138.971 9.77148 139.751 9.92605 140.487 10.2352C141.223 10.5443 141.863 10.9711 142.408 11.5158C142.967 12.0604 143.409 12.708 143.732 13.4587C144.056 14.2094 144.218 15.0337 144.218 15.9316C144.218 16.7706 144.064 17.5655 143.754 18.3162C143.46 19.0669 143.048 19.7293 142.518 20.3033C141.988 20.8627 141.355 21.3116 140.619 21.6501C139.898 21.974 139.111 22.1359 138.257 22.1359C137.418 22.1359 136.631 21.9813 135.894 21.6722C135.158 21.3631 134.511 20.9363 133.951 20.3916C133.407 19.8323 132.972 19.1699 132.649 18.4045C132.34 17.6391 132.185 16.8001 132.185 15.8875C132.185 15.0779 132.332 14.3051 132.627 13.5691C132.921 12.8185 133.333 12.1634 133.863 11.6041C134.393 11.0447 135.019 10.6031 135.74 10.2793C136.476 9.94076 137.278 9.77148 138.146 9.77148Z" fill="black"></path><path d="M144.375 21.4514C144.816 21.4073 145.155 21.341 145.39 21.2527C145.626 21.1644 145.795 21.0246 145.898 20.8332C146.016 20.6419 146.082 20.3769 146.097 20.0384C146.126 19.6998 146.141 19.2435 146.141 18.6694V13.7678C146.141 13.2527 146.126 12.8552 146.097 12.5755C146.067 12.2959 145.986 12.0898 145.854 11.9573C145.736 11.8102 145.559 11.7218 145.324 11.6924C145.088 11.6629 144.772 11.6409 144.375 11.6261V11.2508L148.879 9.77148L148.923 12.3106C149.129 12.0457 149.35 11.766 149.585 11.4716C149.835 11.1772 150.093 10.9049 150.358 10.6547C150.638 10.3897 150.939 10.1763 151.263 10.0144C151.587 9.85246 151.926 9.77148 152.279 9.77148C152.794 9.77148 153.221 9.9187 153.56 10.2131C153.913 10.4927 154.089 10.8975 154.089 11.4274C154.089 11.8543 153.927 12.2297 153.604 12.5535C153.295 12.8773 152.89 13.0392 152.389 13.0392C152.198 13.0392 152.043 13.0098 151.926 12.9509C151.823 12.892 151.69 12.7743 151.528 12.5976L150.822 11.7807C150.704 11.6482 150.601 11.582 150.512 11.582C150.351 11.582 150.115 11.7145 149.806 11.9794C149.512 12.2444 149.217 12.5682 148.923 12.9509V18.6694C148.923 19.2877 148.938 19.766 148.967 20.1046C149.011 20.4432 149.114 20.7007 149.276 20.8774C149.453 21.054 149.703 21.1791 150.027 21.2527C150.365 21.3116 150.822 21.3631 151.396 21.4073V21.8489H144.375V21.4514Z" fill="black"></path><path d="M155.277 7.65201C155.277 7.13682 155.262 6.73938 155.233 6.45973C155.204 6.18005 155.123 5.97399 154.99 5.84149C154.872 5.70902 154.696 5.62808 154.46 5.59862C154.225 5.5692 153.908 5.5471 153.511 5.53239V5.15705L158.125 3.67773C158.111 4.26652 158.096 4.9436 158.081 5.70902C158.067 6.47444 158.059 7.42385 158.059 8.55725V18.6696C158.059 19.2436 158.067 19.6999 158.081 20.0385C158.111 20.377 158.177 20.642 158.28 20.8333C158.398 21.0247 158.574 21.1645 158.81 21.2528C159.045 21.3412 159.384 21.4074 159.826 21.4516V21.849H153.511V21.4516C153.952 21.4074 154.291 21.3412 154.526 21.2528C154.762 21.1645 154.931 21.0247 155.034 20.8333C155.152 20.642 155.218 20.377 155.233 20.0385C155.262 19.6999 155.277 19.2436 155.277 18.6696V7.65201ZM161.15 21.4516C161.886 21.4074 162.284 21.2896 162.343 21.0983C162.416 20.8922 162.225 20.5095 161.768 19.9501L158.103 15.4681L161.835 12.2887C162.1 12.0531 162.335 11.825 162.541 11.6042C162.747 11.3687 162.872 11.1626 162.917 10.986C162.961 10.8093 162.895 10.6621 162.718 10.5444C162.556 10.4266 162.24 10.3677 161.768 10.3677V9.97034H166.736V10.3677C166.383 10.3677 166.059 10.4046 165.765 10.4781C165.485 10.5517 165.198 10.6695 164.904 10.8314C164.624 10.9786 164.33 11.17 164.021 11.4055C163.711 11.641 163.373 11.9206 163.005 12.2445L160.576 14.2979L165.323 20.2151C165.662 20.6273 165.993 20.9364 166.317 21.1424C166.641 21.3338 167.045 21.4368 167.531 21.4516V21.849H161.15V21.4516Z" fill="black"></path><path d="M177.521 22.1363C176.432 22.1363 175.431 22.0259 174.519 21.8051C173.621 21.5696 172.848 21.2826 172.2 20.944V15.5567H172.642C172.789 16.5871 173.002 17.4702 173.282 18.2062C173.576 18.9274 173.922 19.5236 174.32 19.9946C174.732 20.4509 175.203 20.7895 175.733 21.0103C176.263 21.2163 176.859 21.3194 177.521 21.3194C178.007 21.3194 178.463 21.2605 178.89 21.1427C179.332 21.025 179.707 20.8483 180.016 20.6128C180.34 20.3626 180.598 20.0535 180.789 19.6855C180.98 19.3175 181.076 18.8833 181.076 18.3828C181.076 18.0148 181.003 17.6836 180.855 17.3892C180.723 17.0949 180.524 16.8299 180.259 16.5944C179.994 16.3442 179.678 16.116 179.31 15.9099C178.956 15.6892 178.559 15.4757 178.117 15.2697L176.153 14.3423C174.975 13.783 174.04 13.128 173.348 12.3773C172.671 11.6266 172.333 10.714 172.333 9.63943C172.333 9.00648 172.472 8.42508 172.752 7.89518C173.032 7.36527 173.422 6.91631 173.922 6.54833C174.423 6.16564 175.004 5.87125 175.667 5.66515C176.329 5.44439 177.05 5.33398 177.83 5.33398C178.228 5.33398 178.647 5.36341 179.089 5.42229C179.53 5.46645 179.965 5.54004 180.392 5.64309C180.818 5.73139 181.223 5.84915 181.606 5.99636C181.989 6.12883 182.313 6.27604 182.577 6.43793V10.9642H182.136C181.827 9.37449 181.304 8.17486 180.568 7.36527C179.832 6.55569 178.912 6.15093 177.808 6.15093C176.91 6.15093 176.175 6.35698 175.601 6.76913C175.041 7.16657 174.761 7.75532 174.761 8.53549C174.761 8.91818 174.82 9.25674 174.938 9.55113C175.056 9.83078 175.218 10.081 175.424 10.3018C175.63 10.5079 175.865 10.6992 176.13 10.8759C176.395 11.0378 176.675 11.185 176.969 11.3174L179.31 12.4214C179.928 12.7158 180.495 13.0176 181.01 13.3267C181.54 13.6211 181.996 13.9596 182.379 14.3423C182.762 14.7103 183.056 15.1298 183.262 15.6008C183.483 16.0571 183.593 16.5871 183.593 17.1905C183.593 17.9118 183.431 18.5742 183.107 19.1777C182.784 19.7812 182.342 20.3037 181.783 20.7453C181.238 21.1869 180.598 21.5328 179.862 21.783C179.126 22.0185 178.345 22.1363 177.521 22.1363Z" fill="black"></path><path d="M188.272 22.1366C187.816 22.1366 187.411 22.0703 187.058 21.9379C186.705 21.8201 186.403 21.6214 186.153 21.3417C185.917 21.062 185.733 20.694 185.601 20.2377C185.483 19.7814 185.424 19.2221 185.424 18.5597V10.9424H183.547V9.97089H185.469V8.27077L188.206 6.19531V9.97089H191.099V10.9424H188.206V18.096C188.206 18.5229 188.214 18.8909 188.228 19.2C188.258 19.5091 188.316 19.7667 188.405 19.9728C188.508 20.1641 188.648 20.304 188.824 20.3923C189.016 20.4806 189.281 20.5248 189.619 20.5248C189.914 20.5248 190.201 20.4732 190.48 20.3702C190.76 20.2672 191.069 20.0906 191.408 19.8403L191.629 20.039C191.423 20.2893 191.216 20.5395 191.01 20.7897C190.804 21.04 190.569 21.2681 190.304 21.4742C190.053 21.6655 189.759 21.8201 189.42 21.9379C189.097 22.0703 188.714 22.1366 188.272 22.1366Z" fill="black"></path><path d="M198.191 20.2154C197.794 20.7747 197.345 21.2384 196.844 21.6063C196.359 21.9596 195.718 22.1362 194.924 22.1362C194.511 22.1362 194.092 22.07 193.665 21.9375C193.253 21.8198 192.87 21.6432 192.517 21.4076C192.178 21.1574 191.899 20.8557 191.678 20.5024C191.457 20.1344 191.347 19.7075 191.347 19.2218C191.347 18.8685 191.428 18.5447 191.589 18.2503C191.752 17.9559 191.987 17.6762 192.296 17.4113C192.605 17.1463 192.988 16.8887 193.444 16.6385C193.9 16.3883 194.416 16.1233 194.99 15.8436C195.284 15.6965 195.689 15.5051 196.204 15.2696C196.734 15.0341 197.411 14.7397 198.235 14.3864V13.7903C198.235 12.6274 198.073 11.8179 197.75 11.3616C197.426 10.8905 196.896 10.655 196.16 10.655C195.689 10.655 195.314 10.736 195.034 10.8979C194.754 11.0598 194.541 11.2806 194.394 11.5603C194.246 11.8252 194.158 12.149 194.129 12.5318C194.099 12.8998 194.099 13.2972 194.129 13.7241H191.634C191.634 13.2677 191.766 12.8041 192.031 12.333C192.296 11.862 192.649 11.4425 193.091 11.0745C193.547 10.6918 194.084 10.3827 194.703 10.1472C195.321 9.9117 195.983 9.79395 196.69 9.79395C197.205 9.79395 197.713 9.85282 198.213 9.97058C198.728 10.0736 199.177 10.2723 199.56 10.5667C199.957 10.8464 200.274 11.2291 200.509 11.7148C200.745 12.2006 200.855 12.8114 200.841 13.5474L200.708 19.2659C200.694 19.8842 200.745 20.2816 200.863 20.4582C200.995 20.6202 201.209 20.7011 201.503 20.7011C201.68 20.7011 201.842 20.6569 201.989 20.5686C202.151 20.4803 202.313 20.3772 202.475 20.2595L202.695 20.4803C202.401 20.8483 202.048 21.2015 201.636 21.5401C201.223 21.8639 200.753 22.0258 200.223 22.0258C200.002 22.0258 199.774 21.9817 199.538 21.8934C199.302 21.805 199.089 21.6873 198.898 21.5401C198.706 21.3782 198.544 21.1868 198.412 20.966C198.28 20.7453 198.206 20.495 198.191 20.2154ZM198.191 15.1813C197.352 15.5198 196.712 15.7995 196.27 16.0203C195.829 16.2411 195.512 16.4104 195.321 16.5281C194.865 16.8078 194.533 17.0948 194.327 17.3892C194.136 17.6689 194.04 18.0221 194.04 18.449C194.04 18.714 194.092 18.9789 194.195 19.2438C194.298 19.4941 194.445 19.7296 194.636 19.9504C194.828 20.1565 195.063 20.3258 195.343 20.4582C195.623 20.576 195.932 20.6349 196.27 20.6349C196.683 20.6349 197.028 20.5465 197.308 20.3699C197.602 20.1933 197.875 19.9357 198.125 19.5971L198.191 15.1813Z" fill="black"></path><path d="M206.527 22.1366C206.07 22.1366 205.665 22.0703 205.312 21.9379C204.959 21.8201 204.657 21.6214 204.407 21.3417C204.172 21.062 203.988 20.694 203.855 20.2377C203.737 19.7814 203.678 19.2221 203.678 18.5597V10.9424H201.802V9.97089H203.723V8.27077L206.461 6.19531V9.97089H209.353V10.9424H206.461V18.096C206.461 18.5229 206.468 18.8909 206.483 19.2C206.512 19.5091 206.571 19.7667 206.659 19.9728C206.762 20.1641 206.902 20.304 207.079 20.3923C207.27 20.4806 207.535 20.5248 207.873 20.5248C208.168 20.5248 208.455 20.4732 208.735 20.3702C209.014 20.2672 209.324 20.0906 209.662 19.8403L209.883 20.039C209.677 20.2893 209.471 20.5395 209.265 20.7897C209.058 21.04 208.823 21.2681 208.558 21.4742C208.308 21.6655 208.013 21.8201 207.675 21.9379C207.351 22.0703 206.968 22.1366 206.527 22.1366Z" fill="black"></path><path d="M215.01 22.1359C214.141 22.1359 213.369 21.9887 212.692 21.6943C212.015 21.3999 211.448 20.9878 210.991 20.4579C210.535 19.928 210.189 19.3024 209.954 18.5811C209.718 17.8452 209.601 17.0503 209.601 16.1966C209.601 15.3281 209.748 14.5038 210.042 13.7237C210.336 12.9436 210.734 12.2664 211.234 11.6924C211.749 11.1036 212.338 10.6399 213.001 10.3014C213.678 9.94812 214.399 9.77148 215.164 9.77148C215.827 9.77148 216.438 9.87453 216.997 10.0806C217.571 10.2867 218.064 10.5884 218.476 10.9859C218.903 11.3833 219.242 11.8838 219.492 12.4872C219.757 13.076 219.912 13.7605 219.956 14.5406H212.073V14.7172C212.073 15.6151 212.184 16.3953 212.404 17.0577C212.64 17.72 212.949 18.272 213.332 18.7136C213.715 19.1405 214.163 19.4643 214.679 19.6851C215.209 19.8911 215.775 19.9942 216.379 19.9942C217.129 19.9942 217.784 19.8764 218.344 19.6409C218.918 19.3907 219.382 19.0816 219.735 18.7136L220 18.9344C219.809 19.2582 219.565 19.6115 219.271 19.9942C218.977 20.3622 218.624 20.7081 218.211 21.0319C217.814 21.341 217.343 21.606 216.798 21.8268C216.268 22.0328 215.672 22.1359 215.01 22.1359ZM214.833 10.6326C214.038 10.6326 213.413 10.9049 212.956 11.4495C212.515 11.9942 212.235 12.7301 212.118 13.6575H217.174C217.129 12.5976 216.887 11.8322 216.445 11.3612C216.018 10.8755 215.481 10.6326 214.833 10.6326Z" fill="black"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M2.6334 1.40142C2.6334 1.92003 2.32125 2.36573 1.87458 2.56089V25.0372C1.87458 25.2157 1.72995 25.3604 1.55145 25.3604H1.18598C1.00748 25.3604 0.862822 25.2157 0.862822 25.0372V2.56088C0.416155 2.36572 0.104004 1.92003 0.104004 1.40142C0.104004 0.702943 0.670228 0.136719 1.36871 0.136719C2.06718 0.136719 2.6334 0.702943 2.6334 1.40142ZM3.68732 19.3495C5.69875 19.004 7.83265 18.7782 11.711 18.7782C13.9531 18.7782 16.1259 19.0148 18.0563 19.2249C19.5994 19.3929 20.9875 19.544 22.1325 19.544C24.5384 19.544 27.6279 19.4328 28.9397 19.2104C29.0884 19.1852 29.1921 19.0541 29.1921 18.9033V2.42423C29.1921 2.22963 29.0215 2.07925 28.8282 2.10212C26.9219 2.32768 24.9133 2.44046 22.1325 2.44046C20.8242 2.44046 19.4678 2.2907 17.9546 2.12363C16.046 1.9129 13.888 1.67463 11.2628 1.67463C8.22741 1.67463 5.88595 1.97865 3.98479 2.22551C3.85065 2.24292 3.71872 2.26005 3.58886 2.27677C3.4274 2.29757 3.30668 2.4349 3.30668 2.5977V19.0299C3.30668 19.2313 3.48882 19.3835 3.68732 19.3495Z" fill="black"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M17.1912 9.69689V5.95211C17.1912 5.95211 15.7448 5.75879 15.1845 5.75879C15.1845 5.75879 15.1772 7.49154 15.1723 9.49682C13.9728 9.41203 12.9157 9.4138 11.971 9.41537C11.8449 9.4156 11.7208 9.4158 11.5986 9.4158V11.6302C12.3223 11.6302 13.6301 11.6302 15.1683 11.7645C15.1666 13.5598 15.1698 15.14 15.1845 15.4593C15.4687 15.524 15.6952 15.5559 15.9944 15.5981C16.285 15.639 16.6442 15.6896 17.1912 15.7893V11.9943C18.7362 12.1771 19.8738 12.2684 21.0115 12.2684V9.97089C19.7792 9.97089 18.8676 9.87958 17.1912 9.69689Z" fill="white"></path></svg></a></div><div class="sc-breuTD dIdqUp"><div class="sc-ksZaOG dVtZVI"><div class="sc-hAZoDl bnTEbp">Quickstart</div><div class="sc-fnykZs jDWNHy">The Network State in One Essay</div></div><div class="sc-iqcoie gYCFYZ"><div class="sc-crXcEl fafcIY" style="flex: 40 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 21.8114%;"></div></div><div class="sc-crXcEl fafcIY" style="flex: 435 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 0%;"></div></div><div class="sc-crXcEl fafcIY" style="flex: 48 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 0%;"></div></div><div class="sc-crXcEl fafcIY" style="flex: 168 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 0%;"></div></div><div class="sc-crXcEl fafcIY" style="flex: 249 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 0%;"></div></div><div class="sc-crXcEl fafcIY" style="flex: 57 1 0%;"><div class="sc-evZas jYJsaL progress" style="width: 0%;"></div></div><div style="width: 15px;"></div></div></div><div role="menubar" class="sc-fEOsli jiGQVR" style="justify-content: flex-end; visibility: visible;"><div class="sc-dIouRR ciofVT" style="opacity: 0;">Copied!</div><button aria-label="Open Book Navigation Menu" class="sc-bjUoiL fbIfmi header-menu-button"><img aria-hidden="true" alt="Book Navigation Icon" src="./The Network State in One Essay _ The Network State_files/toc.svg"></button></div><div role="navigation" aria-hidden="true" aria-label="Book Table of Contents Navigation Menu" class="sc-ezWOiH kxtNJj header-menu" style="right: 14px;"><div role="contentinfo" class="sc-bZkfAO bbwqHd"><a href="https://thenetworkstate.com/" class="sc-kLLXSd iBjcUr"><img alt="Book Cover Icon" src="./The Network State in One Essay _ The Network State_files/cover-tns-small.png"></a><div class="sc-ikZpkk bsUoQu"><div class="sc-jIZahH bcZPDT"><div class="sc-himrzO bTzPRQ">The Network State</div><div class="sc-gXmSlM esKGkH">Balaji Srinivasan</div></div><a class="sc-cxabCf DyazL primary" href="https://www.amazon.com/dp/B09VPKZR3G" target="_blank" style="padding: 12px; margin-top: 36px; margin-bottom: 0px;"><img aria-hidden="true" src="./The Network State in One Essay _ The Network State_files/amazon-white.svg">Buy on Amazon</a></div></div><a href="https://book.thenetworkstate.com/" class="sc-ciZhAO kifwbK first"><div class="sc-jdAMXn ipEjxx">Home</div><div class="sc-bZnhIo dZYBot">&nbsp;</div></a><a aria-label="Go to chapter 1: Quickstart" href="https://thenetworkstate.com/preamble" class="sc-cCsOjp KLaMC">1. Quickstart</a><a href="https://thenetworkstate.com/preamble" id="chapter-nav-menu-item-preamble" aria-label="Go to section Preamble in chapter 1" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Preamble</div></a><a href="https://thenetworkstate.com/the-network-state-in-one-sentence" id="chapter-nav-menu-item-the-network-state-in-one-sentence" aria-label="Go to section The Network State in One Sentence in chapter 1" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The Network State in One Sentence</div></a><a href="https://thenetworkstate.com/the-network-state-in-one-image" id="chapter-nav-menu-item-the-network-state-in-one-image" aria-label="Go to section The Network State in One Image in chapter 1" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The Network State in One Image</div></a><a href="https://thenetworkstate.com/the-network-state-in-one-thousand-words" id="chapter-nav-menu-item-the-network-state-in-one-thousand-words" aria-label="Go to section The Network State in One Thousand Words in chapter 1" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The Network State in One Thousand Words</div></a><a href="https://thenetworkstate.com/the-network-state-in-one-essay" id="chapter-nav-menu-item-the-network-state-in-one-essay" aria-label="Go to section The Network State in One Essay in chapter 1" class="sc-ciZhAO kifwbK selected"><div class="sc-jdAMXn ipEjxx">The Network State in One Essay</div></a><a aria-label="Go to chapter 2: History as Trajectory" href="https://thenetworkstate.com/prologue" class="sc-cCsOjp KLaMC">2. History as Trajectory</a><a href="https://thenetworkstate.com/prologue" id="chapter-nav-menu-item-prologue" aria-label="Go to section Prologue in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Prologue</div></a><a href="https://thenetworkstate.com/microhistory-and-macrohistory" id="chapter-nav-menu-item-microhistory-and-macrohistory" aria-label="Go to section Microhistory and Macrohistory in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Microhistory and Macrohistory</div></a><a href="https://thenetworkstate.com/political-power-and-technological-truth" id="chapter-nav-menu-item-political-power-and-technological-truth" aria-label="Go to section Political Power and Technological Truth in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Political Power and Technological Truth</div></a><a href="https://thenetworkstate.com/god-state-network" id="chapter-nav-menu-item-god-state-network" aria-label="Go to section God, State, Network in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">God, State, Network</div></a><a href="https://thenetworkstate.com/people-of-god-people-of-the-state-people-of-the-network" id="chapter-nav-menu-item-people-of-god-people-of-the-state-people-of-the-network" aria-label="Go to section People of God, People of the State, People of the Network in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">People of God, People of the State, People of the Network</div></a><a href="https://thenetworkstate.com/if-the-news-is-fake-imagine-history" id="chapter-nav-menu-item-if-the-news-is-fake-imagine-history" aria-label="Go to section If the News is Fake, Imagine History in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">If the News is Fake, Imagine History</div></a><a href="https://thenetworkstate.com/fragmentation-frontier-fourth-turning-future-is-our-past" id="chapter-nav-menu-item-fragmentation-frontier-fourth-turning-future-is-our-past" aria-label="Go to section Fragmentation, Frontier, Fourth Turning, Future Is Our Past in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Fragmentation, Frontier, Fourth Turning, Future Is Our Past</div></a><a href="https://thenetworkstate.com/left-is-the-new-right-is-the-new-left" id="chapter-nav-menu-item-left-is-the-new-right-is-the-new-left" aria-label="Go to section Left is the New Right is the New Left in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Left is the New Right is the New Left</div></a><a href="https://thenetworkstate.com/the-one-commandment" id="chapter-nav-menu-item-the-one-commandment" aria-label="Go to section The One Commandment in chapter 2" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The One Commandment</div></a><a aria-label="Go to chapter 3: The Tripolar Moment" href="https://thenetworkstate.com/nyt-ccp-btc" class="sc-cCsOjp KLaMC">3. The Tripolar Moment</a><a href="https://thenetworkstate.com/nyt-ccp-btc" id="chapter-nav-menu-item-nyt-ccp-btc" aria-label="Go to section NYT, CCP, BTC in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">NYT, CCP, BTC</div></a><a href="https://thenetworkstate.com/the-dated-and-the-timeless" id="chapter-nav-menu-item-the-dated-and-the-timeless" aria-label="Go to section The Dated and the Timeless in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The Dated and the Timeless</div></a><a href="https://thenetworkstate.com/a-bipolar-america-and-a-tripolar-triangle" id="chapter-nav-menu-item-a-bipolar-america-and-a-tripolar-triangle" aria-label="Go to section A Bipolar America and a Tripolar Triangle in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">A Bipolar America and a Tripolar Triangle</div></a><a href="https://thenetworkstate.com/moral-power-martial-power-money-power" id="chapter-nav-menu-item-moral-power-martial-power-money-power" aria-label="Go to section Moral Power, Martial Power, Money Power in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Moral Power, Martial Power, Money Power</div></a><a href="https://thenetworkstate.com/submission-sympathy-sovereignty" id="chapter-nav-menu-item-submission-sympathy-sovereignty" aria-label="Go to section Submission, Sympathy, Sovereignty in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Submission, Sympathy, Sovereignty</div></a><a href="https://thenetworkstate.com/conflicts-and-alliances" id="chapter-nav-menu-item-conflicts-and-alliances" aria-label="Go to section Conflicts and Alliances in chapter 3" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Conflicts and Alliances</div></a><a aria-label="Go to chapter 4: Decentralization, Recentralization" href="https://thenetworkstate.com/the-possible-futures" class="sc-cCsOjp KLaMC">4. Decentralization, Recentralization</a><a href="https://thenetworkstate.com/the-possible-futures" id="chapter-nav-menu-item-the-possible-futures" aria-label="Go to section The Possible Futures in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">The Possible Futures</div></a><a href="https://thenetworkstate.com/sociopolitical-axes" id="chapter-nav-menu-item-sociopolitical-axes" aria-label="Go to section Sociopolitical Axes in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Sociopolitical Axes</div></a><a href="https://thenetworkstate.com/technoeconomic-axes" id="chapter-nav-menu-item-technoeconomic-axes" aria-label="Go to section Technoeconomic Axes in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Technoeconomic Axes</div></a><a href="https://thenetworkstate.com/foreseeable-futures" id="chapter-nav-menu-item-foreseeable-futures" aria-label="Go to section Foreseeable Futures in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Foreseeable Futures</div></a><a href="https://thenetworkstate.com/american-anarchy-chinese-control-international-intermediate" id="chapter-nav-menu-item-american-anarchy-chinese-control-international-intermediate" aria-label="Go to section American Anarchy, Chinese Control, International Intermediate in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">American Anarchy, Chinese Control, International Intermediate</div></a><a href="https://thenetworkstate.com/victory-conditions-and-surprise-endings" id="chapter-nav-menu-item-victory-conditions-and-surprise-endings" aria-label="Go to section Victory Conditions and Surprise Endings in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Victory Conditions and Surprise Endings</div></a><a href="https://thenetworkstate.com/towards-a-recentralized-center" id="chapter-nav-menu-item-towards-a-recentralized-center" aria-label="Go to section Towards a Recentralized Center in chapter 4" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Towards a Recentralized Center</div></a><a aria-label="Go to chapter 5: From Nation States to Network States" href="https://thenetworkstate.com/why-now" class="sc-cCsOjp KLaMC">5. From Nation States to Network States</a><a href="https://thenetworkstate.com/why-now" id="chapter-nav-menu-item-why-now" aria-label="Go to section Why Now? in chapter 5" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Why Now?</div></a><a href="https://thenetworkstate.com/on-nation-states" id="chapter-nav-menu-item-on-nation-states" aria-label="Go to section On Nation States in chapter 5" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">On Nation States</div></a><a href="https://thenetworkstate.com/on-network-states" id="chapter-nav-menu-item-on-network-states" aria-label="Go to section On Network States in chapter 5" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">On Network States</div></a><a aria-label="Go to chapter 6: Appendix" href="https://thenetworkstate.com/acknowledgments" class="sc-cCsOjp KLaMC">6. Appendix</a><a href="https://thenetworkstate.com/acknowledgments" id="chapter-nav-menu-item-acknowledgments" aria-label="Go to section Acknowledgments in chapter 6" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Acknowledgments</div></a><a href="https://thenetworkstate.com/about-1729" id="chapter-nav-menu-item-about-1729" aria-label="Go to section About 1729 in chapter 6" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">About 1729</div></a><a href="https://thenetworkstate.com/footnotes" id="chapter-nav-menu-item-footnotes" aria-label="Go to section Footnotes in chapter 6" class="sc-ciZhAO kifwbK"><div class="sc-jdAMXn ipEjxx">Footnotes</div></a></div></header></div></div>
+  
+
+<link as="image" href="https://book.thenetworkstate.com/assets/quickstart-sectioned.png" rel="preload"><link as="image" href="https://book.thenetworkstate.com/assets/history-as-trajectory-sectioned.png" rel="preload"><link as="image" href="https://book.thenetworkstate.com/assets/the-tripolar-moment-sectioned.png" rel="preload"><link as="image" href="https://book.thenetworkstate.com/assets/decentralization-recentralization-sectioned.png" rel="preload"><link as="image" href="https://book.thenetworkstate.com/assets/from-nation-states-to-network-states-sectioned.png" rel="preload"><iframe id="_hjSafeContext_39778760" src="./The Network State in One Essay _ The Network State_files/saved_resource.html" style="display: none !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important;"></iframe><div id="__FEISHU_CLIPPER__"></div><iframe name="_hjRemoteVarsFrame" title="_hjRemoteVarsFrame" id="_hjRemoteVarsFrame" src="./The Network State in One Essay _ The Network State_files/box-69edcc3187336f9b0a3fbb4c73be9fe6.html" style="display: none !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important;"></iframe></body></html>

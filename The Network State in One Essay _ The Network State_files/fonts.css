@@ -1,0 +1,160 @@
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-RegularItalic.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-MediumItalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Suisse Works';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-BoldItalic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Suisse Works Book';
+    src: url('https://book.thenetworkstate.com/fonts/SuisseWorks-Book.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Italic.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Bold-Italic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Italic.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Bold-Italic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Italic.woff2') format('woff2');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie A';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-A-Bold-Italic.woff2') format('woff2');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Italic.woff2') format('woff2');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Valkyrie B';
+    src: url('https://book.thenetworkstate.com/fonts/Valkyrie-B-Bold-Italic.woff2') format('woff2');
+    font-weight: bold;
+    font-style: italic;
+}
